@@ -20,7 +20,7 @@ export default (props) => {
   let history = useHistory();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.clear();
     history.push("/sign-in");
   };
 

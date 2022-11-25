@@ -6,7 +6,7 @@ import Modal from "react-bootstrap/Modal";
 import { useHistory } from "react-router-dom";
 import axios from "../../api/axios";
 
-function Modals({ showModals, setShowModals, dataDetail, updateCourse }) {
+function Modals({ showModals, setShowModals, dataDetail }) {
   const [editTitle, setEditTitle] = useState();
   const [editPrice, setEditPrice] = useState();
   const [editLevel, setEditLevel] = useState();
@@ -14,11 +14,16 @@ function Modals({ showModals, setShowModals, dataDetail, updateCourse }) {
     { title: "", url: "", isTrial: false },
   ]);
 
+  const [editTrial, setEditTrial] = useState(Boolean);
+  const token = localStorage.getItem("tokenAdmin");
+
   let history = useHistory();
 
   const handleClose = () => setShowModals(false);
 
   const closeButton = () => setShowModals(false);
+
+  const DATA_COURSE_URL = "/courses";
 
   useEffect(() => {
     setEditTitle(dataDetail?.title);
@@ -30,8 +35,12 @@ function Modals({ showModals, setShowModals, dataDetail, updateCourse }) {
   const handleServiceAdd = () => {
     setEditLessonsFormList([
       ...editLessonsFormList,
-      { title: "", url: "", isTrial: false },
+      { title: "", url: "", isTrial: editTrial },
     ]);
+  };
+
+  const handleOnchangeTrialListLessons = (isChecked) => {
+    setEditTrial(isChecked);
   };
 
   const handleServiceRemove = (index) => {
@@ -40,9 +49,52 @@ function Modals({ showModals, setShowModals, dataDetail, updateCourse }) {
     setEditLessonsFormList(list);
   };
 
-  // const updateCourse = async () {
-  //   axios.
-  // }
+  const updateCourse = async () => {
+    var data = JSON.stringify({
+      title: editTitle,
+      thumbnail:
+        "https://haigiangnetwork.com/assets/storage/images/category_OZY2UL5JP0GB.png",
+      trainer: {
+        avatarUrl:
+          "https://haigiangnetwork.com/assets/storage/images/category_OZY2UL5JP0GB.png",
+        name: "Test123",
+        title: "Tiktok",
+      },
+      level: editLevel,
+      highlights: ["certificate"],
+      overview:
+        "Hướng dẫn từ bài bản, những yếu tố cần và đủ để xây dựng một kênh TikTok chất lượng. Bật mí nhiều bí mật hậu trường đằng sau những clip triệu view. Giải đáp thắc mắc tại sao kênh TikTok của bạn không được lên xu hướng. Hướng dẫn xây dựng content TikTok chi tiết từ ý tưởng, nội dung kịch bản, nhạc nền,...",
+      introduce:
+        "Những bạn chưa hiểu rõ về nền tảng, muốn nghiên cứu sâu hơn để thực hành xây dựng kênh TikTok cho bản thân, doanh nghiệp",
+      lessons: editLessonsFormList,
+      exercises: [
+        {
+          title: "Giới thiệu nền tảng",
+          url: "https://haigiangnetwork.com/assets/storage/video/video-6289c8efe68437.58071920.mp4",
+          isTrial: true,
+        },
+      ],
+      tags: ["tiktok", "video", "youtube"],
+      price: editPrice,
+      durationInSeconds: 700,
+      isEndSell: false,
+    });
+    await axios
+      .put(`${DATA_COURSE_URL}/${dataDetail._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        data: data,
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setShowModals(false);
+  };
 
   return (
     <>
@@ -85,8 +137,8 @@ function Modals({ showModals, setShowModals, dataDetail, updateCourse }) {
               >
                 <option disabled>{editLevel}</option>
                 <option value="basic">BASIC</option>
-                <option value="medium">MEDIUM</option>
-                <option value="advanced">ADVANCED</option>
+                <option value="advance">ADVANCE</option>
+                <option value="pro">PRO</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
@@ -99,13 +151,13 @@ function Modals({ showModals, setShowModals, dataDetail, updateCourse }) {
                       <span>
                         <Form.Check
                           label="Học Thử"
-                          value={singleList.isTrial}
-                          // onChange={(e) =>
-                          //   handleOnchangeTrialListLessons(
-                          //     e.target.checked,
-                          //     index
-                          //   )
-                          // }
+                          checked={singleList.isTrial}
+                          onChange={(e) =>
+                            handleOnchangeTrialListLessons(
+                              e.target.checked,
+                              index
+                            )
+                          }
                         />
                       </span>
                     </div>

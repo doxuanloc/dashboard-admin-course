@@ -3,24 +3,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBoxOpen,
   faCartArrowDown,
-  faChartPie,
   faChevronDown,
   faClipboard,
   faCommentDots,
   faFileAlt,
-  faPlus,
   faRocket,
   faStore,
 } from "@fortawesome/free-solid-svg-icons";
 import { Col, Row, Button, Dropdown } from "@themesberg/react-bootstrap";
-import { ChoosePhotoWidget, ProfileCardWidget } from "../components/Widgets";
+import { ProfileCardWidget } from "../components/Widgets";
 import { GeneralInfoForm } from "../components/Forms";
 import { useHistory } from "react-router-dom";
 
 export default () => {
   let history = useHistory();
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("tokenAdmin");
     if (!token) {
       history.push("/sign-in");
     }

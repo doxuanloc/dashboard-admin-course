@@ -1,25 +1,17 @@
 import React, { useState } from "react";
-import moment from "moment-timezone";
-import Datetime from "react-datetime";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
+
 import ImageUploading from "react-images-uploading";
 import { WithContext as ReactTags } from "react-tag-input";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import {
-  Col,
-  Row,
-  Card,
-  Form,
-  Button,
-  InputGroup,
-} from "@themesberg/react-bootstrap";
+import FormData from "form-data";
+
+import { Col, Row, Card, Form, Button } from "@themesberg/react-bootstrap";
 import axios from "../api/axios";
 
 export const GeneralInfoForm = () => {
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState();
   const [lessonsFormList, setLessonsFormList] = useState([
     { title: "", url: "", isTrial: false },
   ]);
@@ -33,7 +25,7 @@ export const GeneralInfoForm = () => {
   const [price, setPrice] = useState();
   const [durationInSeconds, setDurationInSeconds] = useState(0);
   const [loading, setLoading] = useState(false);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("tokenAdmin");
 
   const nameAdmin = localStorage.getItem("nameAdmin");
 
@@ -63,10 +55,36 @@ export const GeneralInfoForm = () => {
     setHightLights([...highlights, highlight]);
   };
 
-  const onChangeImg = (imageList) => {
-    if (imageList) {
-      setImages(imageList);
-    }
+  const onChangeImg = (e) => {
+    console.log(e.target.files[0]);
+    var data = new FormData();
+    data.append(
+      "file",
+
+      e.target.files[0]
+    );
+    data.append("name", "ahihi");
+
+    var config = {
+      method: "post",
+      url: "https://courses-booking.vercel.app/files/upload",
+      headers: {
+        ...data,
+      },
+      data: data,
+    };
+
+    axios(config)
+      .then(function (response) {
+        setImages(response.data.data.webViewLink);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    // if (imageList) {
+    //   setImages(imageList);
+    // }
   };
 
   const handleServiceAdd = () => {
@@ -89,8 +107,7 @@ export const GeneralInfoForm = () => {
         URL_COURSER,
         {
           title: titleCourse,
-          thumbnail:
-            "https://img.freepik.com/free-vector/tiktok-banner-with-watercolor-splatter_69286-194.jpg?w=2000",
+          thumbnail: images,
           level: level,
           highlights: highlights.map((item) => item.text),
           introduce: introduce,
@@ -121,8 +138,7 @@ export const GeneralInfoForm = () => {
       })
       .catch((err) => {
         console.log(err);
-        // const dataErr = err?.response?.data?.message;
-        // dataErr?.map((item) => {
+        // dataErr.map((item) => {
         //   toast.error(item, {
         //     position: toast.POSITION.TOP_CENTER,
         //   });
@@ -160,6 +176,7 @@ export const GeneralInfoForm = () => {
 
   return (
     <Card border="light" className="bg-white shadow-sm mb-3">
+      <ToastContainer />
       <Card.Body>
         <h5 className="mb-4">Tạo Khóa Học Mới</h5>
         <Form>
@@ -175,10 +192,10 @@ export const GeneralInfoForm = () => {
                 />
               </Form.Group>
             </Col>
-            {/* <Col md={6} className="mb-3">
+            <Col md={6} className="mb-3">
               <Form.Group id="image">
                 <Form.Label>Ảnh Bìa Khóa Học</Form.Label>
-                <ImageUploading
+                {/* <ImageUploading
                   multiple
                   value={images}
                   onChange={onChangeImg}
@@ -218,9 +235,10 @@ export const GeneralInfoForm = () => {
                       ))}
                     </div>
                   )}
-                </ImageUploading>
+                </ImageUploading> */}
+                <input type="file" name="file" onChange={onChangeImg} />
               </Form.Group>
-            </Col> */}
+            </Col>
           </Row>
           <Row>
             <Col md={3} className="mb-3">
@@ -233,8 +251,8 @@ export const GeneralInfoForm = () => {
                 >
                   <option value=""></option>
                   <option value="BASIC">BASIC</option>
-                  <option value="MEDIUM">MEDIUM</option>
-                  <option value="ADVANCED">ADVANCED</option>
+                  <option value="ADVANCE">ADVANCE</option>
+                  <option value="PRO">PRO</option>
                 </Form.Select>
               </Form.Group>
             </Col>
@@ -382,7 +400,6 @@ export const GeneralInfoForm = () => {
             )}
           </div>
         </Form>
-        <ToastContainer />
       </Card.Body>
     </Card>
   );

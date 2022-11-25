@@ -1,5 +1,5 @@
 import { Form, Modal } from "react-bootstrap";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 function ModalDetailOrders({
   showModalDetail,
@@ -30,7 +30,7 @@ function ModalDetailOrders({
           <>
             {dataDetailOrder?.items?.map((item) => (
               <Modal.Title id="example-modal-sizes-title-lg" key={item.index}>
-                {item.course}
+                {item.course.title}
               </Modal.Title>
             ))}
           </>

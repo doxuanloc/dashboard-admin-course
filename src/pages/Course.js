@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 export default () => {
   let history = useHistory();
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("tokenAdmin");
     if (!token) {
       history.push("/sign-in");
     }

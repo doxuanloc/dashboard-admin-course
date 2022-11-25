@@ -39,7 +39,7 @@ export default () => {
         }
       )
       .then((res) => {
-        localStorage.setItem("token", res.data.data.token.accessToken);
+        localStorage.setItem("tokenAdmin", res.data.data.token.accessToken);
         localStorage.setItem("nameAdmin", res.data.data.user.fullName);
         toast.success("Đăng Nhập Thành Công!", {
           position: toast.POSITION.TOP_CENTER,
@@ -47,7 +47,7 @@ export default () => {
         history.push("/");
       })
       .catch((err) => {
-        toast.error(err.response.data.message, {
+        toast.error(err?.response?.data?.message, {
           position: toast.POSITION.TOP_CENTER,
         });
         setPassword("");

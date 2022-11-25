@@ -4,8 +4,6 @@ import Modal from "react-bootstrap/Modal";
 import {
   faAngleDown,
   faAngleUp,
-  faArrowDown,
-  faArrowUp,
   faCheckCircle,
   faEllipsisH,
   faEye,
@@ -21,16 +19,15 @@ import {
   Table,
   Dropdown,
   ProgressBar,
-  Pagination,
   ButtonGroup,
 } from "@themesberg/react-bootstrap";
-import { Link } from "react-router-dom";
 
-import { Routes } from "../routes";
-import { pageVisits, pageTraffic, pageRanking } from "../data/tables";
+import { pageTraffic, pageRanking } from "../data/tables";
 import axios from "../api/axios";
 import { useState } from "react";
 import Modals from "../pages/components/Modals";
+import { useHistory } from "react-router-dom";
+import Pagination from "./Pagination/Pagination";
 
 import { ToastContainer, toast } from "react-toastify";
 import ModalDetailOrders from "../pages/components/ModalDetailOrder";
@@ -53,25 +50,31 @@ const ValueChange = ({ value, suffix }) => {
   );
 };
 
-export const PageVisitsTable = () => {
+export const PageVisitsTable = ({ listUsers }) => {
+  // Get current posts
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage, setPostsPerPage] = useState(10);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = listUsers.slice(indexOfFirstPost, indexOfLastPost);
   const TableRow = (props) => {
-    const { pageName, views, returnValue, bounceRate } = props;
-    const bounceIcon = bounceRate < 0 ? faArrowDown : faArrowUp;
-    const bounceTxtColor = bounceRate < 0 ? "text-danger" : "text-success";
+    const { email, isPurchased, phoneNumber } = props;
+
+    const textColor = isPurchased ? "text-success" : "text-info";
 
     return (
-      <tr>
-        <th scope="row">{pageName}</th>
-        <td>{views}</td>
-        <td>${returnValue}</td>
-        <td>
-          <FontAwesomeIcon
-            icon={bounceIcon}
-            className={`${bounceTxtColor} me-3`}
-          />
-          {Math.abs(bounceRate)}%
-        </td>
-      </tr>
+      <>
+        <tr>
+          <th scope="row">{email}</th>
+          <td className={`${textColor} me-3`}>
+            {isPurchased ? "Học Viên" : "Khách"}
+          </td>
+          <td>{phoneNumber}</td>
+        </tr>
+      </>
     );
   };
 
@@ -80,7 +83,7 @@ export const PageVisitsTable = () => {
       <Card.Header>
         <Row className="align-items-center">
           <Col>
-            <h5>Số Lượng Truy Cập Trang Web</h5>
+            <h5>User Đã Đăng Kí Tài Khoản Gần Đây </h5>
           </Col>
           <Col className="text-end">
             <Button variant="secondary" size="sm">
@@ -92,17 +95,22 @@ export const PageVisitsTable = () => {
       <Table responsive className="align-items-center table-flush">
         <thead className="thead-light">
           <tr>
-            <th scope="col">Tên Trang</th>
-            <th scope="col">Lượt Xem Trang</th>
-            <th scope="col">Doanh Thu</th>
-            <th scope="col">Tỉ Lệ</th>
+            <th scope="col">Email</th>
+            <th scope="col">Thành Viên</th>
+            <th scope="col">Số Điện Thoại</th>
           </tr>
         </thead>
         <tbody>
-          {pageVisits.map((pv) => (
-            <TableRow key={`page-visit-${pv.id}`} {...pv} />
+          {currentPosts?.map((pv) => (
+            <TableRow key={pv._id} {...pv} />
           ))}
         </tbody>
+        <Pagination
+          currentPage={currentPage}
+          postsPerPage={postsPerPage}
+          totalPosts={listUsers.length}
+          paginate={paginate}
+        />
       </Table>
     </Card>
   );
@@ -260,14 +268,26 @@ export const TransactionsTable = () => {
   const DATA_ORDER_URL = "/orders";
 
   const [dataOrder, setDataOrder] = useState([]);
-  const [numPage, setNumPage] = useState(1);
+
   const [totalTransactions, setTotalTransactions] = useState(0);
-  const token = localStorage.getItem("token");
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [showModalDetail, setShowModalDetail] = useState(false);
   const [dataDetailOrder, setDataDetailOrder] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage, setPostsPerPage] = useState(10);
+
+  const history = useHistory();
+
+  const token = localStorage.getItem("tokenAdmin");
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Get current posts
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = dataOrder.slice(indexOfFirstPost, indexOfLastPost);
 
   const getDataAllOrder = async () => {
     setLoading(true);
@@ -282,7 +302,9 @@ export const TransactionsTable = () => {
         setTotalTransactions(res?.data?.data.length);
       })
       .catch((err) => {
-        console.log(err);
+        if (err.response.data.message === "Unauthorized") {
+          history.push("/sign-in");
+        }
       });
     setLoading(false);
   };
@@ -300,6 +322,7 @@ export const TransactionsTable = () => {
         },
       })
       .then((res) => {
+        setShowModalDetail(true);
         setDataDetailOrder(res?.data?.data);
         console.log(res);
       })
@@ -307,23 +330,37 @@ export const TransactionsTable = () => {
         console.log(err);
       });
     setLoading(false);
-    setShowModalDetail(true);
   };
 
   const handleOrderCompleted = async (id) => {
-    await axios
-      .post(`${DATA_COURSE_URL}/${id}/complete`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    // await axios
+    //   .post(`orders/${id}/complete`, {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   })
+    //   .then((res) => {
+    //     toast.success(res?.data?.data?.message);
+    //   })
+    //   .catch((err) => {
+    //     toast.error(err?.response?.data?.message);
+    //   });
+
+    var config = {
+      method: "post",
+      url: `orders/${id}/complete`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    axios(config)
+      .then(function (response) {
+        toast.success(response?.data?.data?.message);
       })
-      .then((res) => {
-        toast.success(res?.data?.data?.message);
-      })
-      .catch((err) => {
-        toast.error(err?.response?.data?.message);
+      .catch(function (error) {
+        toast.error(error?.response?.data?.message);
       });
-    setLoading(false);
   };
 
   return (
@@ -350,7 +387,7 @@ export const TransactionsTable = () => {
               </>
             )}
             <tbody>
-              {dataOrder?.map((item) => (
+              {currentPosts?.map((item) => (
                 <tr key={item._id}>
                   <td>{item._id}</td>
                   <td>
@@ -374,7 +411,7 @@ export const TransactionsTable = () => {
                           ? "success"
                           : item.status === "PENDING"
                           ? "warning"
-                          : item.status === "Canceled"
+                          : item.status === "CANCELED"
                           ? "danger"
                           : "primary"
                       }`}
@@ -434,17 +471,12 @@ export const TransactionsTable = () => {
           </Table>
 
           <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-            <Nav>
-              {dataOrder.length <= 10 ? (
-                <Pagination className="mb-2 mb-lg-0">
-                  <Pagination.Prev>Trước</Pagination.Prev>
-                  <Pagination.Item active>1</Pagination.Item>
-                  <Pagination.Next>Sau</Pagination.Next>
-                </Pagination>
-              ) : (
-                <div></div>
-              )}
-            </Nav>
+            <Pagination
+              currentPage={currentPage}
+              postsPerPage={postsPerPage}
+              totalPosts={dataOrder.length}
+              paginate={paginate}
+            />
             <small className="fw-bold mt-3">
               <b>{totalTransactions}</b> <b>Đơn Hàng</b>
             </small>
@@ -465,15 +497,27 @@ export const DataCourseTable = () => {
   const [dataCourses, setDataCourses] = useState([]);
   const [numPage, setNumPage] = useState(1);
   const [totalCourses, setTotalCourses] = useState(0);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("tokenAdmin");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [showModals, setShowModals] = useState(false);
   const [dataDetail, setDataDetail] = useState();
   const [idCourseDel, setIdCourseDel] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage, setPostsPerPage] = useState(10);
+
+  const history = useHistory();
 
   const handleClose = () => setConfirmDelete(false);
+
+  // Get current posts
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = dataCourses.slice(indexOfFirstPost, indexOfLastPost);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const getDataAllCourses = async () => {
     setLoading(true);
@@ -497,22 +541,6 @@ export const DataCourseTable = () => {
     getDataAllCourses();
   }, []);
 
-  const updateCourse = async (id) => {
-    await axios
-      .put(`${DATA_COURSE_URL}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setDataCourses(dataCourses);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    setShowModals(false);
-  };
-
   const showConfirmDel = (id) => {
     setConfirmDelete(true);
     setIdCourseDel(id);
@@ -533,6 +561,7 @@ export const DataCourseTable = () => {
         toast.error(err?.response?.data?.message);
       });
     setConfirmDelete(false);
+    history.push("/course");
   };
 
   const showDetailCourse = async (id) => {
@@ -547,7 +576,9 @@ export const DataCourseTable = () => {
         setDataDetail(res.data.data);
       })
       .catch((err) => {
-        console.log(err);
+        if (err.response.data.message === "Unauthorized") {
+          history.push("/sign-in");
+        }
       });
     setLoading(false);
     setShowModals(true);
@@ -556,6 +587,7 @@ export const DataCourseTable = () => {
   return (
     <div>
       <Card border="light" className="table-wrapper table-responsive shadow-sm">
+        <ToastContainer />
         <Card.Body className="pt-0">
           <Table hover className="user-table align-items-center">
             <thead>
@@ -577,7 +609,7 @@ export const DataCourseTable = () => {
               </div>
             )}
             <tbody>
-              {dataCourses?.map((item, index) => (
+              {currentPosts?.map((item, index) => (
                 <tr key={item._id}>
                   <td>
                     <button
@@ -602,11 +634,11 @@ export const DataCourseTable = () => {
                       className={`fs-5 text-${
                         item.level === "BASIC"
                           ? "info"
-                          : item.status === "MEDIUM"
-                          ? "primary"
-                          : item.status === "ADVANCED"
-                          ? "primary"
-                          : "danger"
+                          : item.level === "ADVANCE"
+                          ? "success"
+                          : item.level === "PRO"
+                          ? "danger"
+                          : "warning"
                       }`}
                     >
                       {item.level}
@@ -618,7 +650,6 @@ export const DataCourseTable = () => {
                   <td>
                     <div>
                       <Modals
-                        updateCourse={updateCourse}
                         showModals={showModals}
                         setShowModals={setShowModals}
                         dataDetail={dataDetail}
@@ -666,21 +697,17 @@ export const DataCourseTable = () => {
 
           <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
             <Nav>
-              {dataCourses.length <= dataCourses.pageSize ? (
-                <Pagination className="mb-2 mb-lg-0">
-                  <Pagination.Prev>Trước</Pagination.Prev>
-                  <Pagination.Item active>1</Pagination.Item>
-                  <Pagination.Next>Sau</Pagination.Next>
-                </Pagination>
-              ) : (
-                <div></div>
-              )}
+              <Pagination
+                currentPage={currentPage}
+                postsPerPage={postsPerPage}
+                totalPosts={dataCourses.length}
+                paginate={paginate}
+              />
             </Nav>
             <small className="fw-bold mt-3">
               <b>{totalCourses}</b> <b>Khóa Học</b>
             </small>
           </Card.Footer>
-          <ToastContainer />
         </Card.Body>
       </Card>
     </div>

@@ -174,7 +174,7 @@ export const CircleChartWidget = (props) => {
 
 export const BarChartWidget = (props) => {
   const { title, value, percentage, data = [] } = props;
-  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const labels = ["Thứ 2", "Thú 3", "Thứ 4", "Thứ 5", "THứ 6", "Thứ 7"];
   const series = data.map((d) => d.value);
   const percentageIcon = percentage < 0 ? faAngleDown : faAngleUp;
   const percentageColor = percentage < 0 ? "text-danger" : "text-success";
@@ -268,10 +268,16 @@ export const TeamMembersWidget = () => {
   );
 };
 
-export const ProgressTrackWidget = () => {
+export const ProgressTrackWidget = ({ ordersList }) => {
   const Progress = (props) => {
     const { title, percentage, icon, color, last = false } = props;
     const extraClassName = last ? "" : "mb-2";
+
+    // const fillerOrder = ordersList.map((item) =>
+    //   item.items.map((order) => order.course.title.join("").splice("[]"))
+    // );
+
+    // console.log(fillerOrder);
 
     return (
       <Row className={`align-items-center ${extraClassName}`}>
