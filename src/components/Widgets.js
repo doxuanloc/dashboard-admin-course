@@ -308,16 +308,10 @@ export const ProgressTrackWidget = ({ ordersList }) => {
       </Card.Header>
       <Card.Body>
         <Progress
-          title="Tiktok Edit Video"
+          title="Nau Pha Che Cafe"
           color="purple"
           icon={faBootstrap}
           percentage={34}
-        />
-        <Progress
-          title="Pixel - Design System"
-          color="danger"
-          icon={faAngular}
-          percentage={60}
         />
       </Card.Body>
     </Card>
