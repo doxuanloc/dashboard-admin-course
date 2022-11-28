@@ -145,12 +145,12 @@ export default (props = {}) => {
               <div className="d-flex align-items-center">
                 <div className="user-avatar lg-avatar me-4">
                   <Image
-                    src={ProfilePicture}
+                    src="https://nauphache.com/wp-content/uploads/2022/05/nau-pha-che-09-1024x721.png"
                     className="card-img-top rounded-circle border-white"
                   />
                 </div>
                 <div className="d-block">
-                  <h6>Hi, Tiktoker</h6>
+                  <h6>Hi, Admin</h6>
                   <Button
                     as={Link}
                     variant="secondary"
@@ -159,7 +159,7 @@ export default (props = {}) => {
                     className="text-dark"
                   >
                     <FontAwesomeIcon icon={faSignOutAlt} className="me-2" />{" "}
-                    Sign Out
+                    Đăng Xuất
                   </Button>
                 </div>
               </div>

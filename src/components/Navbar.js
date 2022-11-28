@@ -34,8 +34,8 @@ export default (props) => {
               <Dropdown.Toggle as={Nav.Link} className="pt-1 px-0">
                 <div className="media d-flex align-items-center">
                   <Image
-                    src="https://cdnimg.vietnamplus.vn/uploaded/izdss/2022_03_01/tiktok.jpg"
-                    className="user-avatar md-avatar rounded-circle w-100"
+                    src="https://nauphache.com/wp-content/uploads/2022/05/nau-pha-che-09-1024x721.png"
+                    className="user-avatar md-avatar w-10 h-10"
                   />
                   <p className="mb-0 fs-2 fw-bold">Admin</p>
                 </div>

@@ -40,11 +40,11 @@ export const ProfileCardWidget = () => {
       />
       <Card.Body className="pb-5">
         <Card.Img
-          src="https://cdn.nguyenkimmall.com/images/companies/_1/tin-tuc/blog_t5/ung-dung-Tik-Tok-la-gi.jpg"
+          src="https://nauphache.com/wp-content/uploads/2022/05/nau-pha-che-09-1024x721.png"
           alt="Neil Portrait"
           className="user-avatar large-avatar rounded-circle mx-auto mt-n7 mb-4"
         />
-        <Card.Title>TikTok</Card.Title>
+        <Card.Title>Admin</Card.Title>
         <Card.Subtitle className="fw-normal">{nameAdmin}</Card.Subtitle>
         <Card.Text className="text-gray mb-4">HCM, VN</Card.Text>
       </Card.Body>

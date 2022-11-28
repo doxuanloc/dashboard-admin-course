@@ -104,9 +104,9 @@ export default () => {
         </Col>
         <Col xs={12} className="mb-4 d-sm-none">
           <SalesValueWidgetPhone
-            title="Sales Value"
-            value="10,567"
-            percentage={10.57}
+            title="Doanh Thu"
+            value={`${revenue} đ`}
+            percentage={0}
           />
         </Col>
         <Col xs={12} sm={6} xl={4} className="mb-4">
