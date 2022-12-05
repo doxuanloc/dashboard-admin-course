@@ -221,8 +221,8 @@ export const TeamMembersWidget = () => {
       offline: { color: "danger", label: "Offline" },
     };
 
-    const statusColor = status[statusKey] ? status[statusKey].color : "danger",
-      statusLabel = status[statusKey] ? status[statusKey].label : "Offline";
+    const statusColor = status[statusKey] ? status[statusKey].color : "success",
+      statusLabel = status[statusKey] ? status[statusKey].label : "Online";
 
     return (
       <ListGroup.Item className="px-0">

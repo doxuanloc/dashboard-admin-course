@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import ImageUploading from "react-images-uploading";
 import { WithContext as ReactTags } from "react-tag-input";
@@ -9,6 +9,7 @@ import FormData from "form-data";
 
 import { Col, Row, Card, Form, Button } from "@themesberg/react-bootstrap";
 import axios from "../api/axios";
+import { useHistory } from "react-router-dom";
 
 export const GeneralInfoForm = () => {
   const [images, setImages] = useState();
@@ -21,31 +22,23 @@ export const GeneralInfoForm = () => {
   const [highlights, setHightLights] = useState([]);
   const [overview, setOverview] = useState("");
   const [introduce, setIntroduce] = useState("");
-  const [tags, setTags] = useState([]);
+  const [catalog, setCatalog] = useState("");
   const [price, setPrice] = useState();
   const [durationInSeconds, setDurationInSeconds] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [document, setDocument] = useState();
   const token = localStorage.getItem("tokenAdmin");
 
+  const history = useHistory();
   const nameAdmin = localStorage.getItem("nameAdmin");
 
   const URL_COURSER = "/courses";
-
-  const maxNumber = 69;
   const KeyCodes = {
     comma: 188,
     enter: 13,
   };
 
   const delimiters = [KeyCodes.comma, KeyCodes.enter];
-
-  const handleDeleteTags = (i) => {
-    setTags(tags.filter((tag, index) => index !== i));
-  };
-
-  const handleAddition = (tag) => {
-    setTags([...tags, tag]);
-  };
 
   const handleDeleteHighlights = (i) => {
     setHightLights(highlights.filter((highlight, index) => index !== i));
@@ -55,7 +48,7 @@ export const GeneralInfoForm = () => {
     setHightLights([...highlights, highlight]);
   };
 
-  const onChangeImg = (e) => {
+  const onChangeImg = async (e) => {
     console.log(e.target.files[0]);
     var data = new FormData();
     data.append(
@@ -74,17 +67,15 @@ export const GeneralInfoForm = () => {
       data: data,
     };
 
-    axios(config)
+    await axios(config)
       .then(function (response) {
-        setImages(response.data.data.webViewLink);
+        setImages(
+          `https://drive.google.com/thumbnail?id=${response?.data.data.id}`
+        );
       })
       .catch(function (error) {
         console.log(error);
       });
-
-    // if (imageList) {
-    //   setImages(imageList);
-    // }
   };
 
   const handleServiceAdd = () => {
@@ -112,16 +103,11 @@ export const GeneralInfoForm = () => {
           highlights: highlights.map((item) => item.text),
           introduce: introduce,
           overview: overview,
-          trainer: {
-            avatarUrl:
-              "https://haigiangnetwork.com/assets/storage/images/category_OZY2UL5JP0GB.png",
-            name: nameAdmin,
-            title: "Tiktok",
-          },
           lessons: lessonsFormList,
-          tags: tags.map((item) => item.text),
+          catalog: catalog,
           price: parseInt(price),
           durationInSeconds: durationInSeconds,
+          document: document,
         },
         {
           headers: {
@@ -131,23 +117,20 @@ export const GeneralInfoForm = () => {
         }
       )
       .then((res) => {
+        history.push("course");
         console.log(res);
-        toast.success(res?.data?.dada?.message, {
+        toast.success(res?.dada?.message, {
           position: toast.POSITION.TOP_CENTER,
         });
       })
       .catch((err) => {
         console.log(err);
-        // dataErr.map((item) => {
-        //   toast.error(item, {
-        //     position: toast.POSITION.TOP_CENTER,
-        //   });
-        // });
+
+        toast.error(err.response.data.message);
       });
     setLoading(false);
   }
 
-  console.log(level);
   const handleOnchangeTitleListLessons = (e, index) => {
     const { value } = e.target;
 
@@ -164,7 +147,6 @@ export const GeneralInfoForm = () => {
     list[index].url = value;
 
     setLessonsFormList(list);
-    console.log(lessonsFormList);
   };
 
   const handleOnchangeTrialListLessons = (e, index) => {
@@ -195,47 +177,6 @@ export const GeneralInfoForm = () => {
             <Col md={6} className="mb-3">
               <Form.Group id="image">
                 <Form.Label>Ảnh Bìa Khóa Học</Form.Label>
-                {/* <ImageUploading
-                  multiple
-                  value={images}
-                  onChange={onChangeImg}
-                  maxNumber={maxNumber}
-                  dataURLKey="url"
-                >
-                  {({
-                    imageList,
-                    onImageUpload,
-                    onImageUpdate,
-                    onImageRemove,
-                    isDragging,
-                    dragProps,
-                  }) => (
-                    // write your building UI
-                    <div className="upload__image-wrapper">
-                      <button
-                        style={isDragging ? { color: "red" } : undefined}
-                        onClick={onImageUpload}
-                        {...dragProps}
-                      >
-                        Nhập Hoặc Thả Vào đây
-                      </button>
-                      &nbsp;
-                      {imageList?.map((image, index) => (
-                        <div key={index} className="image-item">
-                          <img src={image.url} alt="" width="100" />
-                          <div className="image-item__btn-wrapper">
-                            <button onClick={() => onImageUpdate(index)}>
-                              Cập Nhật
-                            </button>
-                            <button onClick={() => onImageRemove(index)}>
-                              Xóa
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </ImageUploading> */}
                 <input type="file" name="file" onChange={onChangeImg} />
               </Form.Group>
             </Col>
@@ -250,23 +191,24 @@ export const GeneralInfoForm = () => {
                   onChange={(e) => setLevel(e.target.value)}
                 >
                   <option value=""></option>
-                  <option value="BASIC">BASIC</option>
-                  <option value="ADVANCE">ADVANCE</option>
-                  <option value="PRO">PRO</option>
+                  <option value="BASIC">Cơ Bản</option>
+                  <option value="ADVANCE">Nâng Cao</option>
+                  <option value="PRO">Chuyên Nghiệp</option>
                 </Form.Select>
               </Form.Group>
             </Col>
             <Col md={6} className="mb-3">
               <div>
-                <Form.Label>Tags Khóa Học</Form.Label>
-                <ReactTags
-                  tags={tags}
-                  delimiters={delimiters}
-                  handleDelete={handleDeleteTags}
-                  handleAddition={handleAddition}
-                  inputFieldPosition="bottom"
-                  autocomplete
-                />
+                <Form.Label>Danh Mục</Form.Label>
+                <Form.Select
+                  type="checkbox"
+                  required
+                  onChange={(e) => setCatalog(e.target.value)}
+                >
+                  <option value=""></option>
+                  <option value="Trà Sữa">Trà Sữa</option>
+                  <option value="Cà Phê">Cà Phê</option>
+                </Form.Select>
               </div>
             </Col>
             <Col md={10} className="mb-3">
@@ -284,7 +226,7 @@ export const GeneralInfoForm = () => {
             </Col>
           </Row>
           <Row>
-            <Col sm={4} className="mb-3">
+            <Col sm={5} className="mb-3">
               <Form.Group id="price">
                 <Form.Label>Giá Khóa Học</Form.Label>
                 <Form.Control
@@ -292,6 +234,19 @@ export const GeneralInfoForm = () => {
                   type="number"
                   placeholder="Nhập Giá Khóa Học"
                   onChange={(e) => setPrice(e.target.value)}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col sm={4} className="mb-3">
+              <Form.Group id="price">
+                <Form.Label>Thời Lượng Trung Bình</Form.Label>
+                <Form.Control
+                  required
+                  type="number"
+                  placeholder="(phút)"
+                  onChange={(e) => setDurationInSeconds(e.target.value)}
                 />
               </Form.Group>
             </Col>
@@ -373,11 +328,20 @@ export const GeneralInfoForm = () => {
               </Form.Group>
             </Col>
           ))}
-
           <div className="mt-3 mb-10">
             <Button variant="primary" type="submit" onClick={handleServiceAdd}>
               Thêm Bài Học
             </Button>
+          </div>
+
+          <div>
+            <Form.Control
+              type="text"
+              id="url"
+              placeholder="Link Tài Liệu"
+              value={document}
+              onChange={(e) => setDocument(e.target.value)}
+            />
           </div>
           <div className="mt-3">
             {!loading ? (

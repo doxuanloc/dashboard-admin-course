@@ -11,7 +11,7 @@ function Modals({ showModals, setShowModals, dataDetail }) {
   const [editPrice, setEditPrice] = useState();
   const [editLevel, setEditLevel] = useState();
   const [editLessonsFormList, setEditLessonsFormList] = useState([
-    { title: "", url: "", isTrial: false },
+    { title: "", url: "", document: "", isTrial: false },
   ]);
 
   const [editTrial, setEditTrial] = useState(Boolean);
@@ -35,7 +35,7 @@ function Modals({ showModals, setShowModals, dataDetail }) {
   const handleServiceAdd = () => {
     setEditLessonsFormList([
       ...editLessonsFormList,
-      { title: "", url: "", isTrial: editTrial },
+      { title: "", url: "", document: "", isTrial: editTrial },
     ]);
   };
 
@@ -194,6 +194,13 @@ function Modals({ showModals, setShowModals, dataDetail }) {
                       placeholder="Link Bài Học"
                       value={singleList.url}
                       // onChange={(e) => handleOnchangeURLListLessons(e, index)}
+                    />
+                    <Form.Control
+                      type="text"
+                      id="url"
+                      placeholder="Link Tài Liệu"
+                      value={singleList.document}
+                      // onChange={(e) => handleOnchangeURLDocLessons(e, index)}
                     />
                   </Form.Group>
                 </Col>

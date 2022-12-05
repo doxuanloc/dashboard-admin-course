@@ -554,14 +554,18 @@ export const DataCourseTable = () => {
         },
       })
       .then((res) => {
-        toast.success(res?.data?.data?.message);
+        console.log(res);
+        toast.success(res?.data?.message);
+        history.push("/course");
       })
       .catch((err) => {
-        console.log(err);
+        if (err.response.data.message === "Unauthorized") {
+          history.push("/sign-in");
+        }
         toast.error(err?.response?.data?.message);
       });
+    setDataCourses(dataCourses);
     setConfirmDelete(false);
-    history.push("/course");
   };
 
   const showDetailCourse = async (id) => {
